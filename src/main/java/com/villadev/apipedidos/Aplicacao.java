@@ -1,5 +1,6 @@
 package com.villadev.apipedidos;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,20 @@ import com.villadev.apipedidos.domain.Cidade;
 import com.villadev.apipedidos.domain.Cliente;
 import com.villadev.apipedidos.domain.Endereco;
 import com.villadev.apipedidos.domain.Estado;
+import com.villadev.apipedidos.domain.Pagamento;
+import com.villadev.apipedidos.domain.PagamentoComBoleto;
+import com.villadev.apipedidos.domain.PagamentoComCartao;
+import com.villadev.apipedidos.domain.Pedido;
 import com.villadev.apipedidos.domain.Produto;
+import com.villadev.apipedidos.domain.enums.EstadoPagamento;
 import com.villadev.apipedidos.domain.enums.TipoCliente;
 import com.villadev.apipedidos.repositories.CategoriaRepository;
 import com.villadev.apipedidos.repositories.CidadeRepository;
 import com.villadev.apipedidos.repositories.ClienteRepository;
 import com.villadev.apipedidos.repositories.EnderecoRepository;
 import com.villadev.apipedidos.repositories.EstadoRepository;
+import com.villadev.apipedidos.repositories.PagamentoRepository;
+import com.villadev.apipedidos.repositories.PedidoRepository;
 import com.villadev.apipedidos.repositories.ProdutoRepository;
 
 @SpringBootApplication
@@ -36,6 +44,10 @@ public class Aplicacao implements CommandLineRunner {
 	private EnderecoRepository enderecoRepository;
 	@Autowired
 	private ClienteRepository clienteRepository;
+	@Autowired
+	private PedidoRepository pedidoRepository;
+	@Autowired 
+	private PagamentoRepository pagamentoRepository;
 	
 	
 	public static void main(String[] args) {
@@ -92,5 +104,33 @@ public class Aplicacao implements CommandLineRunner {
 		
 		clienteRepository.save(Arrays.asList(joao,pedroPinturasSA));
 		enderecoRepository.save(Arrays.asList(enderecoJoao,enderecoJoao2,enderecoPedroPinturasSA));
+		
+		//cria um pedido
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+		
+		Pedido pedidoJoao = new Pedido(null, formatter.parse("30/09/2017 10:32:28"), 
+				enderecoJoao, 
+				joao);
+				
+		Pedido pedidoJoao2 = new Pedido(null, formatter.parse("01/10/2017 17:05:09"), 
+				enderecoJoao2, 
+				joao);
+		
+		//cria o pagamento do pedido
+		Pagamento pgtoCartao = new PagamentoComCartao(null, EstadoPagamento.QUITADO, 
+				pedidoJoao, 3);		
+		pedidoJoao.setPagamento(pgtoCartao);
+		
+		Pagamento pgtoBoleto = new PagamentoComBoleto(null, EstadoPagamento.PENDENTE, 
+				pedidoJoao2,formatter.parse("02/10/2017 23:59:59"), formatter.parse("01/10/2017 12:15:32"), 
+				"89800107010137867161201255520");
+		
+		pedidoJoao2.setPagamento(pgtoBoleto);
+		
+		joao.getPedidos().addAll(Arrays.asList(pedidoJoao,pedidoJoao2));
+		
+		pedidoRepository.save(Arrays.asList(pedidoJoao,pedidoJoao2));
+		pagamentoRepository.save(Arrays.asList(pgtoBoleto,pgtoCartao));
+		
 	}
 }
