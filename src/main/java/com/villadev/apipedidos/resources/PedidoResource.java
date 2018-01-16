@@ -6,25 +6,25 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.villadev.apipedidos.domain.Cliente;
+import com.villadev.apipedidos.domain.Pedido;
 import com.villadev.apipedidos.json.RespostaJsonSucesso;
-import com.villadev.apipedidos.services.ClienteService;
+import com.villadev.apipedidos.services.PedidoService;
 
 @RestController
-@RequestMapping("/clientes")
-public class ClienteResource {
+@RequestMapping("/pedidos")
+public class PedidoResource {
 	
 	@Autowired
-	private ClienteService clienteService;
+	private PedidoService PedidoService;
 	
 	@GetMapping("/{id}")
 	public RespostaJsonSucesso buscarPorId(@PathVariable Integer id) {
 		
 		RespostaJsonSucesso sucesso = new RespostaJsonSucesso();
-				
-		Cliente cliente = clienteService.buscarPorId(id);
 		
-		sucesso.addObjeto(cliente);
+		Pedido pedido = PedidoService.buscarPorId(id);
+		
+		sucesso.addObjeto(pedido);
 		
 		return sucesso;
 	}

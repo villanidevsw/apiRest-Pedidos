@@ -16,7 +16,7 @@ public class ClienteService {
 	public Cliente buscarPorId(Integer id) {		
 		Cliente cliente = ClienteRepository.findOne(id);
 		if (cliente == null) {
-			throw new RecursoNaoEncontradoException("Cliente : "+ id +" não existe");
+			throw new RecursoNaoEncontradoException("Cliente: "+ id +" não existe");
 		}
 		
 		return cliente;

@@ -1,8 +1,8 @@
-package com.villadev.apipedidos.resources.exceptions;
+package com.villadev.apipedidos.json;
 
 import java.io.Serializable;
 
-public class RespostaJsonErro implements Serializable{
+public class RespostaJsonFalha implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -10,7 +10,7 @@ public class RespostaJsonErro implements Serializable{
 	private String mensagem;
 	private Long timeStamp;
 	
-	public RespostaJsonErro(Integer status, String mensagem, Long timeStamp) {
+	public RespostaJsonFalha(Integer status, String mensagem, Long timeStamp) {
 		super();
 		this.status = status;
 		this.mensagem = mensagem;

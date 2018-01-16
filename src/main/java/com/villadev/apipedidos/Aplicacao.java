@@ -13,6 +13,7 @@ import com.villadev.apipedidos.domain.Cidade;
 import com.villadev.apipedidos.domain.Cliente;
 import com.villadev.apipedidos.domain.Endereco;
 import com.villadev.apipedidos.domain.Estado;
+import com.villadev.apipedidos.domain.ItemPedido;
 import com.villadev.apipedidos.domain.Pagamento;
 import com.villadev.apipedidos.domain.PagamentoComBoleto;
 import com.villadev.apipedidos.domain.PagamentoComCartao;
@@ -25,6 +26,7 @@ import com.villadev.apipedidos.repositories.CidadeRepository;
 import com.villadev.apipedidos.repositories.ClienteRepository;
 import com.villadev.apipedidos.repositories.EnderecoRepository;
 import com.villadev.apipedidos.repositories.EstadoRepository;
+import com.villadev.apipedidos.repositories.ItemPedidoRepository;
 import com.villadev.apipedidos.repositories.PagamentoRepository;
 import com.villadev.apipedidos.repositories.PedidoRepository;
 import com.villadev.apipedidos.repositories.ProdutoRepository;
@@ -48,6 +50,8 @@ public class Aplicacao implements CommandLineRunner {
 	private PedidoRepository pedidoRepository;
 	@Autowired 
 	private PagamentoRepository pagamentoRepository;
+	@Autowired
+	private ItemPedidoRepository itemPedidoRepository;
 	
 	
 	public static void main(String[] args) {
@@ -87,6 +91,7 @@ public class Aplicacao implements CommandLineRunner {
 		
 		estadoRepository.save(Arrays.asList(mg,sp));
 		cidadeRepository.save(Arrays.asList(uberlandia,saoPaulo,campinas));
+		
 		//cadastro cliente
 		Cliente joao = new Cliente(null, "Joao da Silva", "joao@email.com", "11111111111",TipoCliente.PESSOA_FISICA);
 		joao.getTelefones().addAll(Arrays.asList("9999-9999","7777-7777"));
@@ -132,5 +137,18 @@ public class Aplicacao implements CommandLineRunner {
 		pedidoRepository.save(Arrays.asList(pedidoJoao,pedidoJoao2));
 		pagamentoRepository.save(Arrays.asList(pgtoBoleto,pgtoCartao));
 		
+		//cria os itens dos pedidos
+		ItemPedido itemPedidoJoao = new ItemPedido(pedidoJoao, mouse, 0.00, 1, mouse.getPreco());
+		ItemPedido itemPedidoJoao2 = new ItemPedido(pedidoJoao, impressora, 20.00, 1, (impressora.getPreco() - 20.00));
+		ItemPedido itemPedidoJoao3 = new ItemPedido(pedidoJoao2, computador, 0.00, 1, computador.getPreco());
+		
+		pedidoJoao.getItens().addAll(Arrays.asList(itemPedidoJoao,itemPedidoJoao2));
+		pedidoJoao2.getItens().addAll(Arrays.asList(itemPedidoJoao3));
+		
+		mouse.getItens().addAll(Arrays.asList(itemPedidoJoao));
+		impressora.getItens().addAll(Arrays.asList(itemPedidoJoao2));
+		computador.getItens().addAll(Arrays.asList(itemPedidoJoao3));
+		
+		itemPedidoRepository.save(Arrays.asList(itemPedidoJoao,itemPedidoJoao2,itemPedidoJoao3));
 	}
 }

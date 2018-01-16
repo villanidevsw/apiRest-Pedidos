@@ -7,15 +7,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.villadev.apipedidos.json.RespostaJsonFalha;
+
 @ControllerAdvice
 public class RecursoExceptionHandler {
 
 	@ExceptionHandler(RecursoNaoEncontradoException.class)
-	public ResponseEntity<RespostaJsonErro> recursoNaoEncontrado(RecursoNaoEncontradoException ex,
+	public ResponseEntity<RespostaJsonFalha> recursoNaoEncontrado(RecursoNaoEncontradoException ex,
 			HttpServletRequest req) {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new RespostaJsonErro(HttpStatus.NOT_FOUND.value(), ex.getMessage(), System.currentTimeMillis()));
+				.body(new RespostaJsonFalha(HttpStatus.NOT_FOUND.value(), ex.getMessage(), System.currentTimeMillis()));
 
 	}
 
