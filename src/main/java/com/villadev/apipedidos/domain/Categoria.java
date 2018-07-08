@@ -10,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
+import com.villadev.apipedidos.domain.dtos.CategoriaDTO;
+
 @Entity
 public class Categoria implements Serializable {
 	
@@ -78,14 +80,13 @@ public class Categoria implements Serializable {
 		return true;
 	}
 
+	public static Categoria doDto(CategoriaDTO categoriaDTO) {
+		return new Categoria(categoriaDTO.getId(), categoriaDTO.getNome());
+	}
+	
 	@Override
 	public String toString() {
 		return "Categoria [id=" + id + ", nome=" + nome + ", produtos=" + produtos + "]";
 	}
-	
-	
-	
-	
-	
 	
 }
