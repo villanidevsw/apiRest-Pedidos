@@ -5,23 +5,23 @@ import java.util.List;
 
 import com.villadev.apipedidos.json.RespostaJsonFalha;
 
-public class ValidationError extends RespostaJsonFalha {
+public class ValidacaoException extends RespostaJsonFalha {
 	private static final long serialVersionUID = 1L;
 	
-	public ValidationError(Integer status, String mensagem, Long timeStamp, String error, String path) {
+	public ValidacaoException(Integer status, String mensagem, Long timeStamp, String error, String path) {
 		super(status, mensagem, timeStamp, error, path);
 	}
 
 
-	private List<FieldMessageException> erros = new ArrayList<>();
+	private List<CampoMensagemException> erros = new ArrayList<>();
 
 	
-	public List<FieldMessageException> getErros() {
+	public List<CampoMensagemException> getErros() {
 		return erros;
 	}
 
 	public void addError(String fieldName, String messagem) {
-		erros.add(new FieldMessageException(fieldName, messagem));
+		erros.add(new CampoMensagemException(fieldName, messagem));
 	}
 
 }

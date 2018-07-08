@@ -2,16 +2,16 @@ package com.villadev.apipedidos.resources.exceptions;
 
 import java.io.Serializable;
 
-public class FieldMessageException implements Serializable {
+public class CampoMensagemException implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String fieldName;
 	private String message;
 
-	public FieldMessageException() {
+	public CampoMensagemException() {
 	}
 
-	public FieldMessageException(String fieldName, String message) {
+	public CampoMensagemException(String fieldName, String message) {
 		super();
 		this.fieldName = fieldName;
 		this.message = message;

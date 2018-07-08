@@ -18,30 +18,30 @@ public class RecursoExceptionHandler {
 	public ResponseEntity<RespostaJsonFalha> recursoNaoEncontrado(RecursoNaoEncontradoException ex,
 			HttpServletRequest req) {
 
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new RespostaJsonFalha(HttpStatus.NOT_FOUND.value(), ex.getMessage(), System.currentTimeMillis()));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RespostaJsonFalha(HttpStatus.NOT_FOUND.value(),
+				"Não encontrado", System.currentTimeMillis(), ex.getMessage(), req.getRequestURI()));
 
 	}
-	
+
 	@ExceptionHandler(IntegridadeDadosException.class)
-	public ResponseEntity<RespostaJsonFalha> integridadeDados(IntegridadeDadosException ex,
-			HttpServletRequest req) {
+	public ResponseEntity<RespostaJsonFalha> integridadeDados(IntegridadeDadosException ex, HttpServletRequest req) {
 
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-				.body(new RespostaJsonFalha(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis()));
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RespostaJsonFalha(HttpStatus.BAD_REQUEST.value(),
+				"Integridade de dados", System.currentTimeMillis(), ex.getMessage(), req.getRequestURI()));
 
 	}
-	
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<RespostaJsonFalha> validacaoDados(MethodArgumentNotValidException ex,
 			HttpServletRequest req) {
-		
-		ValidationError validationError = new ValidationError(System.currentTimeMillis(), HttpStatus.UNPROCESSABLE_ENTITY.value(), 
-				"Erro de validação", ex.getMessage(), req.getRequestURI());
-		for (FieldError x : ex.getBindingResult().getFieldErrors()) {
-			validationError.addError(x.getField(), x.getDefaultMessage());
-		}		
-		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(validationError);
+
+		ValidacaoException validacaoErro = new ValidacaoException(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+				"Erro de validação", System.currentTimeMillis(), ex.getMessage(), req.getRequestURI());
+
+		ex.getBindingResult().getFieldErrors()
+				.forEach(e -> validacaoErro.addError(e.getField(), e.getDefaultMessage()));
+
+		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(validacaoErro);
 
 	}
 
