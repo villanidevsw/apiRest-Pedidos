@@ -2,48 +2,64 @@ package com.villadev.apipedidos.domain;
 
 import java.io.Serializable;
 
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-public class ItemPedido implements Serializable{
-	
+public class ItemPedido implements Serializable {
+
 	private static final long serialVersionUID = 1L;
-	
+
 	@JsonIgnore
-	@Id
-	private ItemPedidoPK id;
+	//@Id
+	//private ItemPedidoPK id;
 	
+	@EmbeddedId
+	private ItemPedidoPK id = new ItemPedidoPK();
+
+
 	private Double desconto;
 	private Integer quantidade;
 	private Double preco;
-	
+
 	public ItemPedido() {
 	}
 
-	public ItemPedido(Pedido pedido,Produto produto, Double desconto, Integer quantidade, Double preco) {
+	public ItemPedido(Pedido pedido, Produto produto, Double desconto, Integer quantidade, Double preco) {
 		super();
-		
-		id = new ItemPedidoPK();
+
+		//id = new ItemPedidoPK();
 		id.setPedido(pedido);
 		id.setProduto(produto);
-		
+
 		this.desconto = desconto;
 		this.quantidade = quantidade;
 		this.preco = preco;
 	}
-	
+
+	public double getSubTotal() {
+		return (preco - desconto) * quantidade;
+	}
+
+	public void setPedido(Pedido pedido) {
+		id.setPedido(pedido);
+	}
+
+	public void setProduto(Produto produto) {
+		id.setProduto(produto);
+	}
+
 	public Produto getProduto() {
 		return id.getProduto();
 	}
-	
+
 	@JsonIgnore
 	public Pedido getPedido() {
 		return id.getPedido();
 	}
-	
+
 	public ItemPedidoPK getId() {
 		return id;
 	}
@@ -100,6 +116,5 @@ public class ItemPedido implements Serializable{
 			return false;
 		return true;
 	}
-	
-		
+
 }

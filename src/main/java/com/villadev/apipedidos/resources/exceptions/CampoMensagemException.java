@@ -5,31 +5,33 @@ import java.io.Serializable;
 public class CampoMensagemException implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private String fieldName;
-	private String message;
+	private String campo;
+	private String mensagem;
 
 	public CampoMensagemException() {
 	}
 
-	public CampoMensagemException(String fieldName, String message) {
+	public CampoMensagemException(String campo, String mensagem) {
 		super();
-		this.fieldName = fieldName;
-		this.message = message;
+		this.setCampo(campo);
+		this.setMensagem(mensagem);
 	}
 
-	public String getFieldName() {
-		return fieldName;
+	public String getCampo() {
+		return campo;
 	}
 
-	public void setFieldName(String fieldName) {
-		this.fieldName = fieldName;
+	public void setCampo(String campo) {
+		this.campo = campo;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getMensagem() {
+		return mensagem;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setMensagem(String mensagem) {
+		this.mensagem = mensagem;
 	}
+
+	
 }

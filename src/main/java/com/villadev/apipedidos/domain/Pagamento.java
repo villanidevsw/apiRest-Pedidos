@@ -13,10 +13,17 @@ import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.villadev.apipedidos.domain.enums.EstadoPagamento;
 
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = PagamentoComBoleto.class, name = "pagamentoComBoleto"),
+    @JsonSubTypes.Type(value = PagamentoComCartao.class, name = "pagamentoComCartao")
+})
 public abstract class Pagamento implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -24,13 +31,13 @@ public abstract class Pagamento implements Serializable {
 	@Id
 	protected Integer id;
 	@Enumerated(EnumType.STRING)
-	protected EstadoPagamento estado;
+	private EstadoPagamento estado;
 	
 	@JsonIgnore
 	@OneToOne
 	@JoinColumn(name="pedido_id")
 	@MapsId
-	protected Pedido pedido;
+	private Pedido pedido;
 	
 	public Pagamento() {
 	}
@@ -38,8 +45,8 @@ public abstract class Pagamento implements Serializable {
 	public Pagamento(Integer id, EstadoPagamento estado, Pedido pedido) {
 		super();
 		this.id = id;
-		this.estado = estado;
-		this.pedido = pedido;
+		this.setEstado(estado);
+		this.setPedido(pedido);
 	}
 
 	@Override
@@ -65,6 +72,22 @@ public abstract class Pagamento implements Serializable {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	public EstadoPagamento getEstado() {
+		return estado;
+	}
+
+	public void setEstado(EstadoPagamento estado) {
+		this.estado = estado;
+	}
+
+	public Pedido getPedido() {
+		return pedido;
+	}
+
+	public void setPedido(Pedido pedido) {
+		this.pedido = pedido;
 	}
 	
 	
