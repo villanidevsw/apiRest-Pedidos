@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -13,6 +14,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,8 +22,7 @@ import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.villadev.apipedidos.domain.dtos.ClienteDTO;
-import com.villadev.apipedidos.domain.dtos.ClienteNovoDTO;
+import com.villadev.apipedidos.domain.enums.Perfil;
 import com.villadev.apipedidos.domain.enums.TipoCliente;
 
 @Entity
@@ -41,8 +42,15 @@ public class Cliente implements Serializable {
 	private TipoCliente tipo;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "cliente",cascade=CascadeType.ALL)
+	private String senha;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
 	private List<Endereco> enderecos = new ArrayList<>();
+
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "perfis")
+	private Set<Integer> perfis = new HashSet<>();
 
 	@ElementCollection
 	@CollectionTable(name = "telefone")
@@ -53,15 +61,18 @@ public class Cliente implements Serializable {
 	private List<Pedido> pedidos = new ArrayList<>();
 
 	public Cliente() {
+		addPerfil(Perfil.CLIENTE);
 	}
 
-	public Cliente(Integer id, String nome, String email, String cpfOuCnpj, TipoCliente tipo) {
+	public Cliente(Integer id, String nome, String email, String cpfOuCnpj, TipoCliente tipo, String senha) {
 		super();
 		this.id = id;
 		this.nome = nome;
 		this.cpfOuCnpj = cpfOuCnpj;
 		this.tipo = tipo;
 		this.email = email;
+		this.senha = senha;
+		addPerfil(Perfil.CLIENTE);
 	}
 
 	public Integer getId() {
@@ -127,6 +138,14 @@ public class Cliente implements Serializable {
 	public void setPedidos(List<Pedido> pedidos) {
 		this.pedidos = pedidos;
 	}
+	
+	public Set<Perfil> getPerfis() {
+		return perfis.stream().map(p -> Perfil.toEnum(p)).collect(Collectors.toSet());
+	}
+	
+	public void addPerfil(Perfil perfil) {
+		perfis.add(perfil.getCod());
+	}
 
 	@Override
 	public int hashCode() {
@@ -158,27 +177,13 @@ public class Cliente implements Serializable {
 		return "Cliente [id=" + id + ", nome=" + nome + ", cpfOuCnpj=" + cpfOuCnpj + ", tipo=" + tipo + ", enderecos="
 				+ enderecos + ", telefones=" + telefones + "email= " + email + "pedidos= " + pedidos + "]";
 	}
-	
-	public static Cliente doDto(ClienteDTO clienteDTO) {
-		return new Cliente(clienteDTO.getId(), clienteDTO.getNome(), clienteDTO.getEmail(), null,
-				null);
+
+	public String getSenha() {
+		return senha;
 	}
-	
-	public static Cliente doDto(ClienteNovoDTO clienteNovoDTO) {
-		Cliente cliente = new Cliente(null, clienteNovoDTO.getNome(), clienteNovoDTO.getEmail(), clienteNovoDTO.getCpfOuCnpj(),
-				clienteNovoDTO.getTipo());
-		Cidade cidade = new Cidade(clienteNovoDTO.getCidadeId(), null, null);
-		Endereco endereco = new Endereco(null, clienteNovoDTO.getLogradouro(), clienteNovoDTO.getNumero(),
-				clienteNovoDTO.getComplemento(), clienteNovoDTO.getBairro(), clienteNovoDTO.getCep(), cliente, cidade);
-		cliente.getEnderecos().add(endereco);
-		cliente.getTelefones().add(clienteNovoDTO.getTelefone1());
-		if (clienteNovoDTO.getTelefone2() != null) {
-			cliente.getTelefones().add(clienteNovoDTO.getTelefone2());
-		}
-		if (clienteNovoDTO.getTelefone3() != null) {
-			cliente.getTelefones().add(clienteNovoDTO.getTelefone3());
-		}
-		return cliente;
+
+	public void setSenha(String senha) {
+		this.senha = senha;
 	}
 
 }

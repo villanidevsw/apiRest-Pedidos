@@ -6,9 +6,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.villadev.apipedidos.domain.Cliente;
 import com.villadev.apipedidos.domain.ItemPedido;
 import com.villadev.apipedidos.domain.PagamentoComBoleto;
 import com.villadev.apipedidos.domain.Pedido;
@@ -17,7 +21,10 @@ import com.villadev.apipedidos.domain.enums.EstadoPagamento;
 import com.villadev.apipedidos.repositories.ItemPedidoRepository;
 import com.villadev.apipedidos.repositories.PagamentoRepository;
 import com.villadev.apipedidos.repositories.PedidoRepository;
+import com.villadev.apipedidos.resources.exceptions.AuthorizationException;
 import com.villadev.apipedidos.resources.exceptions.RecursoNaoEncontradoException;
+import com.villadev.apipedidos.security.AppUserDetails;
+import com.villadev.apipedidos.security.AppUserDetailsService;
 import com.villadev.apipedidos.services.emails.EmailService;
 
 @Service
@@ -42,6 +49,9 @@ public class PedidoService {
 	
 	@Autowired
 	private EmailService emailService;
+	
+	@Autowired
+	private AppUserDetailsService appUserDetailsService;
 
 	public Pedido buscarPorId(Integer id) {
 		Pedido pedido = pedidoRepository.findOne(id);
@@ -119,5 +129,14 @@ public class PedidoService {
 		pedido = pedidoRepository.save(pedido);
 		return pedido;
 	}
-
+	
+	public Page<Pedido> buscaPaginada(Integer pagina, Integer linhasPorPagina, String ordernarPor, String direcao) {
+		AppUserDetails usuarioAtual = appUserDetailsService.getCurrentUserAuthenticated();
+		if (usuarioAtual == null) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		PageRequest pageRequest = new PageRequest(pagina, linhasPorPagina, Direction.valueOf(direcao), ordernarPor);
+		Cliente cliente =  clienteService.buscarPorId(usuarioAtual.getId());
+		return pedidoRepository.findByCliente(cliente, pageRequest);
+	}
 }

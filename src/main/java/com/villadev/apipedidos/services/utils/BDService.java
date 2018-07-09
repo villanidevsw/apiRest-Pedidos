@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.villadev.apipedidos.domain.Categoria;
@@ -19,6 +20,7 @@ import com.villadev.apipedidos.domain.PagamentoComCartao;
 import com.villadev.apipedidos.domain.Pedido;
 import com.villadev.apipedidos.domain.Produto;
 import com.villadev.apipedidos.domain.enums.EstadoPagamento;
+import com.villadev.apipedidos.domain.enums.Perfil;
 import com.villadev.apipedidos.domain.enums.TipoCliente;
 import com.villadev.apipedidos.repositories.CategoriaRepository;
 import com.villadev.apipedidos.repositories.CidadeRepository;
@@ -32,7 +34,7 @@ import com.villadev.apipedidos.repositories.ProdutoRepository;
 
 @Service
 public class BDService {
-	
+
 	@Autowired
 	private CategoriaRepository categoriaRepository;
 	@Autowired
@@ -51,6 +53,8 @@ public class BDService {
 	private PagamentoRepository pagamentoRepository;
 	@Autowired
 	private ItemPedidoRepository itemPedidoRepository;
+	@Autowired
+	BCryptPasswordEncoder passwordEncoder;
 
 	public void popularBaseDeDados() throws ParseException {
 
@@ -200,12 +204,13 @@ public class BDService {
 		cidadeRepository.save(Arrays.asList(c1, c2, c3));
 
 		Cliente cli1 = new Cliente(null, "Maria Silva", "villani.thiago01@gmail.com", "36378912377",
-				TipoCliente.PESSOA_FISICA);
-
+				TipoCliente.PESSOA_FISICA, passwordEncoder.encode("123"));
 		cli1.getTelefones().addAll(Arrays.asList("27363323", "93838393"));
 
-		Cliente cli2 = new Cliente(null, "Ana Costa", "villadevsw@gmail.com", "31628382740", TipoCliente.PESSOA_FISICA);
+		Cliente cli2 = new Cliente(null, "Ana Costa", "villadevsw@gmail.com", "31628382740", TipoCliente.PESSOA_FISICA,
+				passwordEncoder.encode("321"));
 		cli2.getTelefones().addAll(Arrays.asList("93883321", "34252625"));
+		cli2.addPerfil(Perfil.ADMIN);
 
 		Endereco e1 = new Endereco(null, "Rua Flores", "300", "Apto 303", "Jardim", "38220834", cli1, c1);
 		Endereco e2 = new Endereco(null, "Avenida Matos", "105", "Sala 800", "Centro", "38777012", cli1, c2);

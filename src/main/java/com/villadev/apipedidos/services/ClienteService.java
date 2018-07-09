@@ -7,14 +7,20 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.villadev.apipedidos.domain.Cidade;
 import com.villadev.apipedidos.domain.Cliente;
+import com.villadev.apipedidos.domain.Endereco;
+import com.villadev.apipedidos.domain.dtos.ClienteDTO;
+import com.villadev.apipedidos.domain.dtos.ClienteNovoDTO;
 import com.villadev.apipedidos.repositories.ClienteRepository;
 import com.villadev.apipedidos.repositories.EnderecoRepository;
 import com.villadev.apipedidos.resources.exceptions.IntegridadeDadosException;
 import com.villadev.apipedidos.resources.exceptions.RecursoNaoEncontradoException;
+import com.villadev.apipedidos.security.AppUserDetailsService;
 
 @Service
 public class ClienteService {
@@ -23,9 +29,15 @@ public class ClienteService {
 	private ClienteRepository clienteRepository;
 	@Autowired
 	private EnderecoRepository enderecoRepository;
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
+	@Autowired
+	private AppUserDetailsService appUserDetailsService;
 	
-	
-	public Cliente buscarPorId(Integer id) {		
+	public Cliente buscarPorId(Integer id) {	
+		
+		appUserDetailsService.usuarioTemPermissaoAdmin(id);
+		
 		Cliente cliente = clienteRepository.findOne(id);
 		if (cliente == null) {
 			throw new RecursoNaoEncontradoException("Cliente: "+ id +" não existe");
@@ -75,6 +87,28 @@ public class ClienteService {
 	public Page<Cliente> buscaPaginada(Integer pagina, Integer linhasPorPagina, String ordernarPor, String direcao) {
 		PageRequest pageRequest = new PageRequest(pagina, linhasPorPagina, Direction.valueOf(direcao), ordernarPor);
 		return clienteRepository.findAll(pageRequest);
+	}
+	
+	public Cliente doDto(ClienteDTO clienteDTO) {
+		return new Cliente(clienteDTO.getId(), clienteDTO.getNome(), clienteDTO.getEmail(), null,
+				null,null);
+	}
+	
+	public Cliente doDto(ClienteNovoDTO clienteNovoDTO) {
+		Cliente cliente = new Cliente(null, clienteNovoDTO.getNome(), clienteNovoDTO.getEmail(), clienteNovoDTO.getCpfOuCnpj(),
+				clienteNovoDTO.getTipo(),passwordEncoder.encode(clienteNovoDTO.getSenha()));
+		Cidade cidade = new Cidade(clienteNovoDTO.getCidadeId(), null, null);
+		Endereco endereco = new Endereco(null, clienteNovoDTO.getLogradouro(), clienteNovoDTO.getNumero(),
+				clienteNovoDTO.getComplemento(), clienteNovoDTO.getBairro(), clienteNovoDTO.getCep(), cliente, cidade);
+		cliente.getEnderecos().add(endereco);
+		cliente.getTelefones().add(clienteNovoDTO.getTelefone1());
+		if (clienteNovoDTO.getTelefone2() != null) {
+			cliente.getTelefones().add(clienteNovoDTO.getTelefone2());
+		}
+		if (clienteNovoDTO.getTelefone3() != null) {
+			cliente.getTelefones().add(clienteNovoDTO.getTelefone3());
+		}
+		return cliente;
 	}
 	
 }

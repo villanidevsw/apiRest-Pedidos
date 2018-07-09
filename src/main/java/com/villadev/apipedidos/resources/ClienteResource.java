@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +41,8 @@ public class ClienteResource {
 		return ResponseEntity.ok().body(cliente);
 	}
 	
-	@GetMapping()
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	@GetMapping
 	public ResponseEntity<List<ClienteDTO>> buscarTodos() {
 		List<Cliente> categorias = clienteService.buscarTodos();
 		List<ClienteDTO> categoriasDTO = categorias
@@ -53,7 +55,7 @@ public class ClienteResource {
 	
 	@PostMapping
 	public ResponseEntity<Void> inserir(@Valid @RequestBody ClienteNovoDTO clienteNovoDTO) {
-		Cliente categoria = clienteService.inserir(Cliente.doDto(clienteNovoDTO));
+		Cliente categoria = clienteService.inserir(clienteService.doDto(clienteNovoDTO));
 		URI uri = toURI(categoria,"/{id}");
 		
 		return ResponseEntity.created(uri).build();
@@ -71,16 +73,18 @@ public class ClienteResource {
 	public ResponseEntity<Void> atualizar(@Valid @RequestBody ClienteDTO clienteDTO, @PathVariable Integer id) {
 		
 		clienteDTO.setId(id);
-		clienteService.atualizar(Cliente.doDto(clienteDTO));
+		clienteService.atualizar(clienteService.doDto(clienteDTO));
 		return ResponseEntity.noContent().build();
 	}
 	
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Integer id) {
+	public ResponseEntity<Void> deletar(@PathVariable Integer id) {
 		clienteService.deletar(id);
 		return ResponseEntity.noContent().build();
 	}
 	
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	@GetMapping("/paginada")
 	public ResponseEntity<Page<ClienteDTO>> buscaPaginada(
 			@RequestParam(value="pagina", defaultValue="0") Integer pagina, 

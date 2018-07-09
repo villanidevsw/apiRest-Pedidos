@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -43,6 +42,14 @@ public class RecursoExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(validacaoErro);
 
+	}
+	
+	@ExceptionHandler(AuthorizationException.class)
+	public ResponseEntity<RespostaJsonFalha> semAutorizacao(AuthorizationException ex, HttpServletRequest request) {
+		
+		ValidacaoException err = new ValidacaoException(HttpStatus.FORBIDDEN.value(), "Acesso negado", System.currentTimeMillis(), 
+				ex.getMessage(), request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(err);
 	}
 
 }
