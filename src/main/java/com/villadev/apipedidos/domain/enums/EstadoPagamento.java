@@ -11,7 +11,7 @@ public enum EstadoPagamento {
 		this.estado = estado;
 	}
 	
-	public String getEstado() {
+	public String getDescricaoEstado() {
 		return estado;
 	}
 	

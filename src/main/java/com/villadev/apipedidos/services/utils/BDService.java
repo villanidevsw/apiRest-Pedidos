@@ -199,12 +199,12 @@ public class BDService {
 		estadoRepository.save(Arrays.asList(est1, est2));
 		cidadeRepository.save(Arrays.asList(c1, c2, c3));
 
-		Cliente cli1 = new Cliente(null, "Maria Silva", "nelio.cursos@gmail.com", "36378912377",
+		Cliente cli1 = new Cliente(null, "Maria Silva", "villani.thiago01@gmail.com", "36378912377",
 				TipoCliente.PESSOA_FISICA);
 
 		cli1.getTelefones().addAll(Arrays.asList("27363323", "93838393"));
 
-		Cliente cli2 = new Cliente(null, "Ana Costa", "nelio.iftm@gmail.com", "31628382740", TipoCliente.PESSOA_FISICA);
+		Cliente cli2 = new Cliente(null, "Ana Costa", "villadevsw@gmail.com", "31628382740", TipoCliente.PESSOA_FISICA);
 		cli2.getTelefones().addAll(Arrays.asList("93883321", "34252625"));
 
 		Endereco e1 = new Endereco(null, "Rua Flores", "300", "Apto 303", "Jardim", "38220834", cli1, c1);

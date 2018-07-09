@@ -18,6 +18,7 @@ import com.villadev.apipedidos.repositories.ItemPedidoRepository;
 import com.villadev.apipedidos.repositories.PagamentoRepository;
 import com.villadev.apipedidos.repositories.PedidoRepository;
 import com.villadev.apipedidos.resources.exceptions.RecursoNaoEncontradoException;
+import com.villadev.apipedidos.services.emails.EmailService;
 
 @Service
 public class PedidoService {
@@ -35,6 +36,12 @@ public class PedidoService {
 
 	@Autowired
 	private ProdutoService produtoService;
+	
+	@Autowired
+	private ClienteService clienteService;
+	
+	@Autowired
+	private EmailService emailService;
 
 	public Pedido buscarPorId(Integer id) {
 		Pedido pedido = pedidoRepository.findOne(id);
@@ -52,29 +59,36 @@ public class PedidoService {
 		inserirPagamento(pedido);
 
 		inserirItensPedido(pedido);
-
+		
+		enviaEmailConfirmacao(pedido);
+		
 		return pedido;
+	}
+
+	private void enviaEmailConfirmacao(Pedido pedido) {
+		emailService.sendOrderConfirmationEmail(pedido);		
 	}
 
 	private void inserirItensPedido(Pedido pedido) {
 		List<Integer> produtosId = extrairIdsDosPedidos(pedido);
 		
-		Map<Integer, Double> mapaIdProdutoPreco = buscarIdProdutoPrecoPorIds(produtosId);
+		Map<Integer, Produto> mapaIdProduto = buscarProdutoPorIds(produtosId);
 
 		for (ItemPedido ip : pedido.getItens()) {
 			ip.setDesconto(0.0);
-			ip.setPreco(mapaIdProdutoPreco.get(ip.getProduto().getId()));
+			ip.setProduto(mapaIdProduto.get(ip.getProduto().getId()));
+			ip.setPreco(ip.getProduto().getPreco());
 			ip.setPedido(pedido);
 		}
-
 		itemPedidoRepository.save(pedido.getItens());
+		
 	}
 
-	private Map<Integer, Double> buscarIdProdutoPrecoPorIds(List<Integer> produtosId) {
+	private Map<Integer, Produto> buscarProdutoPorIds(List<Integer> produtosId) {
 		
 		List<Produto> produtos = produtoService.buscarPorIds(produtosId);
-		Map<Integer, Double> mapaPrecoProdutos = produtos.stream().
-				collect(Collectors.toMap(p -> p.getId(), p -> p.getPreco()));
+		Map<Integer, Produto> mapaPrecoProdutos = produtos.stream().
+				collect(Collectors.toMap(p -> p.getId(), p -> p));
 		return mapaPrecoProdutos;
 	}
 
@@ -91,6 +105,7 @@ public class PedidoService {
 	}
 
 	private Pedido inserirPedido(Pedido pedido) {
+		pedido.setCliente(clienteService.buscarPorId(pedido.getCliente().getId()));
 		pedido.setId(null);
 		pedido.setInstante(new Date());
 		pedido.getPagamento().setEstado(EstadoPagamento.PENDENTE);
