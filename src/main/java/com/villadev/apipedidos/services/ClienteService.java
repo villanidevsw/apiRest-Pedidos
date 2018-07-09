@@ -1,8 +1,11 @@
 package com.villadev.apipedidos.services;
 
+import java.awt.image.BufferedImage;
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,16 +13,20 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.villadev.apipedidos.domain.Cidade;
 import com.villadev.apipedidos.domain.Cliente;
 import com.villadev.apipedidos.domain.Endereco;
 import com.villadev.apipedidos.domain.dtos.ClienteDTO;
 import com.villadev.apipedidos.domain.dtos.ClienteNovoDTO;
+import com.villadev.apipedidos.domain.enums.Perfil;
 import com.villadev.apipedidos.repositories.ClienteRepository;
 import com.villadev.apipedidos.repositories.EnderecoRepository;
+import com.villadev.apipedidos.resources.exceptions.AuthorizationException;
 import com.villadev.apipedidos.resources.exceptions.IntegridadeDadosException;
 import com.villadev.apipedidos.resources.exceptions.RecursoNaoEncontradoException;
+import com.villadev.apipedidos.security.AppUserDetails;
 import com.villadev.apipedidos.security.AppUserDetailsService;
 
 @Service
@@ -33,6 +40,16 @@ public class ClienteService {
 	private BCryptPasswordEncoder passwordEncoder;
 	@Autowired
 	private AppUserDetailsService appUserDetailsService;
+	@Autowired
+	private S3Service s3Service;
+	@Autowired
+	private ImageService imageService;
+		
+	@Value("${img.prefix.client.profile}")
+	private String prefix;
+	
+	@Value("${img.profile.size}")
+	private Integer size;
 	
 	public Cliente buscarPorId(Integer id) {	
 		
@@ -111,4 +128,32 @@ public class ClienteService {
 		return cliente;
 	}
 	
+	public URI uploadProfilePicture(MultipartFile multipartFile) {
+		AppUserDetails user = appUserDetailsService.getCurrentUserAuthenticated();
+		if (user == null) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		
+		BufferedImage jpgImage = imageService.getJpgImageFromFile(multipartFile);
+		jpgImage = imageService.cropSquare(jpgImage);
+		jpgImage = imageService.resize(jpgImage, size);
+		
+		String fileName = prefix + user.getId() + ".jpg";
+		
+		return s3Service.uploadFile(imageService.getInputStream(jpgImage, "jpg"), fileName, "image");
+	}
+	
+	public Cliente findByEmail(String email) {
+		AppUserDetails user = appUserDetailsService.getCurrentUserAuthenticated();
+		if (user == null || !user.hasRole(Perfil.ADMIN) && !email.equals(user.getUsername())) {
+			throw new AuthorizationException("Acesso negado");
+		}
+	
+		Cliente obj = clienteRepository.findByEmail(email);
+		if (obj == null) {
+			throw new RecursoNaoEncontradoException(
+					"Objeto não encontrado! Id: " + user.getId() + ", Tipo: " + Cliente.class.getName());
+		}
+		return obj;
+	}
 }

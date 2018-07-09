@@ -7,8 +7,8 @@ public class RespostaJsonFalha implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private Integer status;	
-	private String mensagem;
-	private Long timeStamp;
+	private String message;
+	private Long timestamp;
 	private String error;
 	private String path;
 	
@@ -16,8 +16,8 @@ public class RespostaJsonFalha implements Serializable{
 	public RespostaJsonFalha(Integer status, String mensagem, Long timeStamp, String error, String path) {
 		super();
 		this.status = status;
-		this.mensagem = mensagem;
-		this.timeStamp = timeStamp;
+		this.message = mensagem;
+		this.timestamp = timeStamp;
 		this.error = error;
 		this.path = path;
 	}
@@ -31,19 +31,19 @@ public class RespostaJsonFalha implements Serializable{
 	}
 
 	public String getMensagem() {
-		return mensagem;
+		return message;
 	}
 
 	public void setMensagem(String mensagem) {
-		this.mensagem = mensagem;
+		this.message = mensagem;
 	}
 
 	public Long getTimeStamp() {
-		return timeStamp;
+		return timestamp;
 	}
 
 	public void setTimeStamp(Long timeStamp) {
-		this.timeStamp = timeStamp;
+		this.timestamp = timeStamp;
 	}
 
 	public String getError() {
